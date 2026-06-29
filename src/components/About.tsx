@@ -1,6 +1,7 @@
 import { personalInfo } from "../data/portfolio";
 import { Code2, Smartphone, BarChart3, Layers } from "lucide-react";
 import { useLang } from "../i18n/LangContext";
+import antounPhoto from "../assets/antounphoto.png";
 
 export default function About() {
   const { t } = useLang();
@@ -38,7 +39,7 @@ export default function About() {
               <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-br from-cyan-500/50 to-blue-600/30" />
               <div className="relative w-64 h-64 sm:w-72 sm:h-72 rounded-2xl overflow-hidden border border-cyan-500/20">
                 <img
-                  src="/images/IMG_0835.PNG"
+                  src={antounPhoto}
                   alt="Antoun Helal"
                   className="w-full h-full object-cover object-top"
                 />
