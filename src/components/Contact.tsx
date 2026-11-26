@@ -1,205 +1,132 @@
-import { useState } from "react";
-import { Mail, MapPin, Send, CheckCircle } from "lucide-react";
-import { personalInfo } from "../data/portfolio";
+import { useState, type FormEvent } from "react";
+import { CheckCircle2, Mail, AlertCircle } from "lucide-react";
 import { useLang } from "../i18n/LangContext";
+import { config } from "../content";
+import { SectionHeader, waExternal, waHref, WhatsAppIcon } from "./ui";
 
-const GithubIcon = () => (
-  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-    <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-  </svg>
-);
+type Status = "idle" | "sending" | "sent" | "error";
 
-const LinkedinIcon = () => (
-  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-  </svg>
-);
-
+// Formulaire Netlify Forms : le même formulaire caché existe dans index.html
+// pour que Netlify le détecte au déploiement (name="contact").
 export default function Contact() {
-  const { t } = useLang();
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [sent, setSent] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
+  const { c } = useLang();
+  const f = c.contact.form;
+  const [status, setStatus] = useState<Status>("idle");
+  const waProps = waExternal ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
-  const handleSubmit = (e: React.FormEvent) => {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const subject = encodeURIComponent(form.subject || `Portfolio Contact from ${form.name}`);
-    const body = encodeURIComponent(
-      `Hi Antoun,\n\nMy name is ${form.name}.\n\n${form.message}\n\nBest regards,\n${form.name}\n${form.email}`
-    );
-    window.location.href = `mailto:${personalInfo.email}?subject=${subject}&body=${body}`;
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
-  };
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    if (data.get("bot-field")) return;
+    setStatus("sending");
+    try {
+      const body = new URLSearchParams();
+      data.forEach((value, key) => body.append(key, String(value)));
+      const res = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      setStatus("sent");
+      form.reset();
+    } catch {
+      setStatus("error");
+    }
+  }
 
-  const inputClass = (field: string) =>
-    `w-full px-4 py-3 rounded-xl bg-white/5 border text-white text-sm placeholder-slate-500 outline-none transition-all duration-200 ${
-      focused === field
-        ? "border-cyan-500/60 bg-cyan-500/5 shadow-lg shadow-cyan-500/10"
-        : "border-white/10 hover:border-white/20"
-    }`;
+  const field =
+    "w-full rounded-xl bg-[#0a0f1e] border border-white/15 px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20";
 
   return (
-    <section id="contact" className="py-24 px-6 bg-[#0a0f1e]">
-      <div className="max-w-6xl mx-auto">
-        {/* Section header */}
-        <div className="flex items-center gap-4 mb-16">
-          <div className="flex flex-col">
-            <span className="text-cyan-400 text-sm font-semibold tracking-widest uppercase mb-2">
-              {t("contact.label")}
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white font-space">
-              {t("contact.title")}
-            </h2>
+    <section id="contact" className="py-20 sm:py-28 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-10 lg:gap-16">
+        <div>
+          <SectionHeader label={c.contact.label} title={c.contact.title} intro={c.contact.text} />
+          <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row gap-3">
+            <a
+              href={waHref(c.contact.whatsappMessage)}
+              {...waProps}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold bg-cyan-400 text-[#0a0f1e] hover:bg-cyan-300 transition-colors"
+            >
+              <WhatsAppIcon />
+              {c.contact.whatsapp}
+            </a>
+            <a
+              href={`mailto:${config.email}`}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white border border-white/15 hover:border-cyan-400/60 hover:bg-white/5 transition-colors"
+            >
+              <Mail size={18} />
+              {config.email}
+            </a>
           </div>
-          <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/40 to-transparent ml-6 mt-6" />
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-10">
-          {/* Left: Info */}
-          <div className="lg:col-span-2 space-y-8">
-            <p className="text-slate-300 text-base leading-relaxed">
-              {t("contact.cta")}
-            </p>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              {t("contact.description")}
-            </p>
+        <form
+          name="contact"
+          method="POST"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          onSubmit={onSubmit}
+          className="p-5 sm:p-8 rounded-3xl bg-white/[0.03] border border-white/10 space-y-4"
+        >
+          <input type="hidden" name="form-name" value="contact" />
+          <p className="hidden">
+            <label>
+              Ne pas remplir : <input name="bot-field" tabIndex={-1} autoComplete="off" />
+            </label>
+          </p>
 
-            {/* Contact details */}
-            <div className="space-y-4">
-              <a
-                href={`mailto:${personalInfo.email}`}
-                className="flex items-center gap-4 p-4 rounded-xl bg-white/3 border border-white/8 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all duration-200 group"
-              >
-                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500/20 transition-colors">
-                  <Mail size={16} />
-                </div>
-                <div>
-                  <p className="text-slate-500 text-xs mb-0.5">{t("contact.email")}</p>
-                  <p className="text-white text-sm font-medium">{personalInfo.email}</p>
-                </div>
-              </a>
+          <div>
+            <label htmlFor="cf-name" className="block text-sm font-medium text-slate-200 mb-1.5">
+              {f.name} <span className="text-slate-500 font-normal">({f.required})</span>
+            </label>
+            <input id="cf-name" name="name" required autoComplete="name" className={field} />
+          </div>
+          <div>
+            <label htmlFor="cf-business" className="block text-sm font-medium text-slate-200 mb-1.5">
+              {f.business}
+            </label>
+            <input id="cf-business" name="business" placeholder={f.businessPlaceholder} className={field} />
+          </div>
+          <div>
+            <label htmlFor="cf-contact" className="block text-sm font-medium text-slate-200 mb-1.5">
+              {f.contact} <span className="text-slate-500 font-normal">({f.required})</span>
+            </label>
+            <input id="cf-contact" name="contact" required autoComplete="email" className={field} />
+          </div>
+          <div>
+            <label htmlFor="cf-message" className="block text-sm font-medium text-slate-200 mb-1.5">
+              {f.message} <span className="text-slate-500 font-normal">({f.required})</span>
+            </label>
+            <textarea id="cf-message" name="message" required rows={4} placeholder={f.messagePlaceholder} className={field} />
+          </div>
 
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-white/3 border border-white/8">
-                <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-                  <MapPin size={16} />
-                </div>
-                <div>
-                  <p className="text-slate-500 text-xs mb-0.5">{t("contact.location")}</p>
-                  <p className="text-white text-sm font-medium">France 🇫🇷</p>
-                </div>
-              </div>
-            </div>
+          <button
+            type="submit"
+            disabled={status === "sending"}
+            className="w-full px-6 py-3.5 rounded-xl font-semibold bg-white text-[#0a0f1e] hover:bg-cyan-100 disabled:opacity-60 transition-colors cursor-pointer"
+          >
+            {status === "sending" ? f.sending : f.send}
+          </button>
 
-            {/* Social links */}
-            <div>
-              <p className="text-slate-500 text-xs uppercase tracking-widest mb-4">
-                {t("contact.findMe")}
+          <div aria-live="polite">
+            {status === "sent" && (
+              <p className="flex items-start gap-2 text-emerald-300 text-sm">
+                <CheckCircle2 size={18} className="shrink-0 mt-0.5" />
+                {f.success}
               </p>
-              <div className="flex gap-3">
-                <a
-                  href={personalInfo.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-cyan-500/40 hover:bg-cyan-500/10 transition-all duration-200 text-sm font-medium"
-                >
-                  <GithubIcon />
-                  GitHub
-                </a>
-                <a
-                  href={personalInfo.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-cyan-500/40 hover:bg-cyan-500/10 transition-all duration-200 text-sm font-medium"
-                >
-                  <LinkedinIcon />
-                  LinkedIn
-                </a>
-              </div>
-            </div>
+            )}
+            {status === "error" && (
+              <p className="flex items-start gap-2 text-amber-300 text-sm">
+                <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                {f.error}
+              </p>
+            )}
           </div>
-
-          {/* Right: Form */}
-          <div className="lg:col-span-3">
-            <div className="p-6 sm:p-8 rounded-2xl bg-[#0d1526] border border-white/8">
-              <h3 className="text-white font-bold text-lg mb-6">{t("contact.formTitle")}</h3>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-slate-400 text-xs mb-1.5">{t("contact.name")}</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder={t("contact.namePlaceholder")}
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      onFocus={() => setFocused("name")}
-                      onBlur={() => setFocused(null)}
-                      className={inputClass("name")}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-400 text-xs mb-1.5">{t("contact.emailLabel")}</label>
-                    <input
-                      type="email"
-                      required
-                      placeholder={t("contact.emailPlaceholder")}
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      onFocus={() => setFocused("email")}
-                      onBlur={() => setFocused(null)}
-                      className={inputClass("email")}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-slate-400 text-xs mb-1.5">{t("contact.subject")}</label>
-                  <input
-                    type="text"
-                    placeholder={t("contact.subjectPlaceholder")}
-                    value={form.subject}
-                    onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                    onFocus={() => setFocused("subject")}
-                    onBlur={() => setFocused(null)}
-                    className={inputClass("subject")}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-400 text-xs mb-1.5">{t("contact.message")}</label>
-                  <textarea
-                    required
-                    rows={5}
-                    placeholder={t("contact.messagePlaceholder")}
-                    value={form.message}
-                    onChange={(e) => setForm({ ...form, message: e.target.value })}
-                    onFocus={() => setFocused("message")}
-                    onBlur={() => setFocused(null)}
-                    className={`${inputClass("message")} resize-none`}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-400 hover:to-blue-400 shadow-lg shadow-cyan-500/20 hover:shadow-cyan-400/30 hover:scale-[1.01]"
-                >
-                  {sent ? (
-                    <>
-                      <CheckCircle size={16} />
-                      {t("contact.sent")}
-                    </>
-                  ) : (
-                    <>
-                      <Send size={16} />
-                      {t("contact.send")}
-                    </>
-                  )}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
+          <p className="text-xs text-slate-500">{f.privacy}</p>
+        </form>
       </div>
     </section>
   );

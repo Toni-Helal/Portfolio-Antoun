@@ -1,15 +1,34 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Antoun Helal — Product-Oriented Web & Mobile Developer</title>
-    <meta name="description" content="Portfolio of Antoun Helal — Product-Oriented Web & Mobile Developer building modern web and mobile products with React, Python/AI, iOS/Swift, and WordPress." />
+    <title>Antoun Helal · Sites web pour coachs, studios et commerces à Paris</title>
+    <meta name="description" content="Coach sportif et développeur web à Paris : des sites clairs en français, anglais et arabe, avec avis Google, paiement en ligne et automatisations. Premier échange de 15 minutes offert." />
+    <meta name="theme-color" content="#0a0f1e" />
+    <link rel="canonical" href="https://portfolioantoun.netlify.app/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:url" content="https://portfolioantoun.netlify.app/" />
+    <meta property="og:title" content="Antoun Helal · Sites web pour coachs, studios et commerces à Paris" />
+    <meta property="og:description" content="Des sites clairs en français, anglais et arabe, avec avis Google, paiement en ligne et automatisations. Premier échange offert." />
+    <meta property="og:image" content="https://portfolioantoun.netlify.app/images/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
+    <!-- Formulaire caché pour que Netlify Forms détecte le formulaire « contact » au déploiement -->
+    <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="name" />
+      <input type="text" name="business" />
+      <input type="text" name="contact" />
+      <textarea name="message"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
