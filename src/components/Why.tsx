@@ -14,8 +14,8 @@ export default function Why() {
           <img
             src="images/antoun.webp"
             alt={c.why.photoAlt}
-            width={600}
-            height={800}
+            width={540}
+            height={720}
             loading="lazy"
             className="w-full rounded-2xl border border-white/10 object-cover aspect-[3/4]"
           />

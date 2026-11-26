@@ -8,7 +8,7 @@ export const config = {
   email: "info@antounhelal.fr",
   // Numéro WhatsApp au format international, sans + ni espaces (ex. 33612345678).
   // Vide = les boutons WhatsApp renvoient vers le formulaire de contact.
-  whatsapp: "",
+  whatsapp: "33764218488",
   github: "https://github.com/Toni-Helal",
   linkedin: "https://www.linkedin.com/in/antoun-helal",
   cv: "cv-antoun-helal.pdf",
