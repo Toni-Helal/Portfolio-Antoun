@@ -12,7 +12,7 @@ export const config = {
   github: "https://github.com/Toni-Helal",
   linkedin: "https://www.linkedin.com/in/antoun-helal",
   cv: "cv-antoun-helal.pdf",
-  siteUrl: "https://portfolioantoun.netlify.app/",
+  siteUrl: "https://web.antounhelal.fr/",
 };
 
 export type CaseStudy = {
